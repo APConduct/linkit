@@ -134,6 +134,10 @@ Algebraic:
   ceil(x)        - Ceiling (round up)
   round(x)       - Round to nearest integer
 
+Angle Conversion:
+  rads(x)        - Convert degrees to radians
+  degs(x)        - Convert radians to degrees
+
 Logarithmic:
   ln(x)          - Natural logarithm
   log10(x)       - Base-10 logarithm
@@ -152,7 +156,7 @@ Logic:
   not(x)         - Logical NOT (0 becomes 1, non-zero becomes 0)
 
 Usage: function_name(expression)
-Example: sin(PI/2), sqrt(16), fact(5), isprime(17)
+Example: sin(PI/2), sqrt(16), fact(5), rads(90), degs(PI)
     """.trimIndent()
     )
 }
@@ -222,11 +226,21 @@ Rounding:
   ceil(3.2)
   round(3.5)
 
+Angle conversion:
+  rads(90)
+  degs(PI)
+  sin(rads(30))
+  cos(rads(60))
+  tan(rads(45))
+  degs(rads(180))
+
 Mixed expressions:
   sqrt(16) + sin(PI/6)
   fact(4) + log2(8)
   PHI * TAU / 2
   abs(-42) + sign(-5)
+  sin(rads(30)) + cos(rads(60))
+  asin(sin(rads(45)))
 
 Try entering any of these expressions!
     """.trimIndent()

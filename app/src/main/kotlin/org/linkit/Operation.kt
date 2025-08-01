@@ -13,10 +13,14 @@ class Degree {
     constructor(value: Int) {
         this.value = value.toDouble()
     }
+    @Suppress("UNUSED_VARIABLE")
     public fun to_radian(): Radian {
-        if (value < 0 || value > 360)
-                throw IllegalArgumentException("Degree value must be between 0 and 360")
-        return Radian((value * kotlin.math.PI / 180).toInt(), 1)
+        // Remove the 0-360 restriction to allow any degree value
+        val radianValue = value * kotlin.math.PI / 180
+        // Convert to fraction representation for precision
+        val denominator = 180
+        val numerator = (value * kotlin.math.PI).toInt()
+        return Radian(numerator, denominator)
     }
 }
 
@@ -39,7 +43,7 @@ class Radian {
     }
     public fun to_degree(): Degree {
         if (coef_denom == 0) throw IllegalArgumentException("Denominator cannot be zero")
-        val degreeValue = (coef_numer.toDouble() / coef_denom) * 180 / kotlin.math.PI
+        val degreeValue = (coef_numer.toDouble() / coef_denom) * 180
         return Degree(degreeValue)
     }
 }
@@ -148,6 +152,10 @@ sealed class Operation {
         object Exp : Unary() // Exponential function
         object Log1p : Unary() // Logarithm of (1 + x)
         // object Expm1 : Unary() // Exponential minus 1
+
+        // Angle conversion functions
+        object Rads : Unary() // Convert degrees to radians
+        object Degs : Unary() // Convert radians to degrees
     }
 }
 
@@ -375,6 +383,14 @@ class Calc {
                                     "Logarithm of (1 + x) is undefined for x <= -1"
                             )
                     kotlin.math.ln(1 + operand)
+                }
+                Operation.Unary.Rads -> {
+                    // Convert degrees to radians
+                    operand * kotlin.math.PI / 180.0
+                }
+                Operation.Unary.Degs -> {
+                    // Convert radians to degrees
+                    operand * 180.0 / kotlin.math.PI
                 }
             }
 }

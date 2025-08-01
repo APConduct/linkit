@@ -461,6 +461,35 @@ class AppTest {
     }
 
     @Test
+    fun testAngleConversionFunctions() {
+        val parser = Parser()
+
+        // Test rads(90) = PI/2
+        val rads90Expr = parser.parse("rads(90)")
+        assertEquals(kotlin.math.PI / 2, calc.eval(rads90Expr), 0.0001)
+
+        // Test rads(180) = PI
+        val rads180Expr = parser.parse("rads(180)")
+        assertEquals(kotlin.math.PI, calc.eval(rads180Expr), 0.0001)
+
+        // Test degs(PI) = 180
+        val degsPIExpr = parser.parse("degs(PI)")
+        assertEquals(180.0, calc.eval(degsPIExpr), 0.0001)
+
+        // Test degs(PI/2) = 90
+        val degsPI2Expr = parser.parse("degs(PI/2)")
+        assertEquals(90.0, calc.eval(degsPI2Expr), 0.0001)
+
+        // Test round trip: degs(rads(45)) = 45
+        val roundTripExpr = parser.parse("degs(rads(45))")
+        assertEquals(45.0, calc.eval(roundTripExpr), 0.0001)
+
+        // Test using conversion in trig functions: sin(rads(30)) = 0.5
+        val sinRads30Expr = parser.parse("sin(rads(30))")
+        assertEquals(0.5, calc.eval(sinRads30Expr), 0.0001)
+    }
+
+    @Test
     fun testComplexExpressions() {
         val parser = Parser()
 
@@ -477,5 +506,9 @@ class AppTest {
         val complexExpr3 = parser.parse("sinh(1) + sin(PI/2)")
         val expectedResult = kotlin.math.sinh(1.0) + 1.0
         assertEquals(expectedResult, calc.eval(complexExpr3), 0.0001)
+
+        // Test angle conversions with other functions
+        val complexExpr4 = parser.parse("cos(rads(60)) + sin(rads(30))")
+        assertEquals(1.0, calc.eval(complexExpr4), 0.0001) // cos(60°) + sin(30°) = 0.5 + 0.5
     }
 }

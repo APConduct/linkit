@@ -271,7 +271,9 @@ class ExpressionParser(private val tokens: List<Token>) {
                     "isprime",
                     "iseven",
                     "isodd",
-                    "factors" -> {
+                    "factors",
+                    "rads",
+                    "degs" -> {
                         consume()
                         val operand = parsePrimary()
                         val operation =
@@ -317,6 +319,8 @@ class ExpressionParser(private val tokens: List<Token>) {
                                     "iseven" -> Operation.Unary.IsEven
                                     "isodd" -> Operation.Unary.IsOdd
                                     "factors" -> Operation.Unary.Factors
+                                    "rads" -> Operation.Unary.Rads
+                                    "degs" -> Operation.Unary.Degs
                                     else -> throw ParseException("Unknown function: $name")
                                 }
                         return Expr.UnaryOp(operation, operand)
