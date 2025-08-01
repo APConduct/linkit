@@ -58,6 +58,11 @@ private fun gcd(a: Int, b: Int): Int {
     return gcd(b, a % b)
 }
 
+enum class AngleMode {
+    RADIANS,
+    DEGREES
+}
+
 sealed class Operation {
     sealed class Binary : Operation() {
         object Add : Binary()
@@ -167,6 +172,8 @@ sealed class Expr {
 }
 
 class Calc {
+    private var angleMode = AngleMode.RADIANS
+
     private val constants =
             mapOf(
                     "PI" to kotlin.math.PI,
@@ -176,8 +183,17 @@ class Calc {
                     "SQRT2" to kotlin.math.sqrt(2.0),
                     "SQRT3" to kotlin.math.sqrt(3.0),
                     "LN2" to kotlin.math.ln(2.0),
-                    "LN10" to kotlin.math.ln(10.0)
+                    "LN10" to kotlin.math.ln(10.0),
+                    "RIGHT_ANGLE" to kotlin.math.PI / 2,
+                    "STRAIGHT_ANGLE" to kotlin.math.PI,
+                    "FULL_CIRCLE" to 2 * kotlin.math.PI
             )
+
+    fun setAngleMode(mode: AngleMode) {
+        angleMode = mode
+    }
+
+    fun getAngleMode(): AngleMode = angleMode
 
     fun eval(expr: Expr): Double =
             when (expr) {
@@ -263,18 +279,108 @@ class Calc {
                     }
                 }
                 Operation.Unary.Negate -> -operand
-                Operation.Unary.Sin -> kotlin.math.sin(operand)
-                Operation.Unary.Cos -> kotlin.math.cos(operand)
-                Operation.Unary.Tan -> kotlin.math.tan(operand)
-                Operation.Unary.Cot -> 1 / kotlin.math.tan(operand)
-                Operation.Unary.Sec -> 1 / kotlin.math.cos(operand)
-                Operation.Unary.Csc -> 1 / kotlin.math.sin(operand)
-                Operation.Unary.Arcsin -> kotlin.math.asin(operand)
-                Operation.Unary.Arccos -> kotlin.math.acos(operand)
-                Operation.Unary.Arctan -> kotlin.math.atan(operand)
-                Operation.Unary.Arccot -> kotlin.math.atan(1 / operand)
-                Operation.Unary.Arcsec -> kotlin.math.acos(1 / operand)
-                Operation.Unary.Arccsc -> kotlin.math.asin(1 / operand)
+                Operation.Unary.Sin -> {
+                    val angleInRadians =
+                            if (angleMode == AngleMode.DEGREES) {
+                                operand * kotlin.math.PI / 180.0
+                            } else {
+                                operand
+                            }
+                    kotlin.math.sin(angleInRadians)
+                }
+                Operation.Unary.Cos -> {
+                    val angleInRadians =
+                            if (angleMode == AngleMode.DEGREES) {
+                                operand * kotlin.math.PI / 180.0
+                            } else {
+                                operand
+                            }
+                    kotlin.math.cos(angleInRadians)
+                }
+                Operation.Unary.Tan -> {
+                    val angleInRadians =
+                            if (angleMode == AngleMode.DEGREES) {
+                                operand * kotlin.math.PI / 180.0
+                            } else {
+                                operand
+                            }
+                    kotlin.math.tan(angleInRadians)
+                }
+                Operation.Unary.Cot -> {
+                    val angleInRadians =
+                            if (angleMode == AngleMode.DEGREES) {
+                                operand * kotlin.math.PI / 180.0
+                            } else {
+                                operand
+                            }
+                    1 / kotlin.math.tan(angleInRadians)
+                }
+                Operation.Unary.Sec -> {
+                    val angleInRadians =
+                            if (angleMode == AngleMode.DEGREES) {
+                                operand * kotlin.math.PI / 180.0
+                            } else {
+                                operand
+                            }
+                    1 / kotlin.math.cos(angleInRadians)
+                }
+                Operation.Unary.Csc -> {
+                    val angleInRadians =
+                            if (angleMode == AngleMode.DEGREES) {
+                                operand * kotlin.math.PI / 180.0
+                            } else {
+                                operand
+                            }
+                    1 / kotlin.math.sin(angleInRadians)
+                }
+                Operation.Unary.Arcsin -> {
+                    val result = kotlin.math.asin(operand)
+                    if (angleMode == AngleMode.DEGREES) {
+                        result * 180.0 / kotlin.math.PI
+                    } else {
+                        result
+                    }
+                }
+                Operation.Unary.Arccos -> {
+                    val result = kotlin.math.acos(operand)
+                    if (angleMode == AngleMode.DEGREES) {
+                        result * 180.0 / kotlin.math.PI
+                    } else {
+                        result
+                    }
+                }
+                Operation.Unary.Arctan -> {
+                    val result = kotlin.math.atan(operand)
+                    if (angleMode == AngleMode.DEGREES) {
+                        result * 180.0 / kotlin.math.PI
+                    } else {
+                        result
+                    }
+                }
+                Operation.Unary.Arccot -> {
+                    val result = kotlin.math.atan(1 / operand)
+                    if (angleMode == AngleMode.DEGREES) {
+                        result * 180.0 / kotlin.math.PI
+                    } else {
+                        result
+                    }
+                }
+                Operation.Unary.Arcsec -> {
+                    val result = kotlin.math.acos(1 / operand)
+                    if (angleMode == AngleMode.DEGREES) {
+                        result * 180.0 / kotlin.math.PI
+                    } else {
+                        result
+                    }
+                }
+                Operation.Unary.Arccsc -> {
+                    val result = kotlin.math.asin(1 / operand)
+                    if (angleMode == AngleMode.DEGREES) {
+                        result * 180.0 / kotlin.math.PI
+                    } else {
+                        result
+                    }
+                }
                 Operation.Unary.Sinh -> kotlin.math.sinh(operand)
                 Operation.Unary.Cosh -> kotlin.math.cosh(operand)
                 Operation.Unary.Tanh -> kotlin.math.tanh(operand)

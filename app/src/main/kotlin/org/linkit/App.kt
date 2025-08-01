@@ -46,6 +46,24 @@ fun main() {
                 showExamples()
                 continue
             }
+            "radians", "rad" -> {
+                calc.setAngleMode(AngleMode.RADIANS)
+                println("📐 Angle mode set to RADIANS")
+                println("   Trig functions now expect/return radians")
+                continue
+            }
+            "degrees", "deg" -> {
+                calc.setAngleMode(AngleMode.DEGREES)
+                println("📐 Angle mode set to DEGREES")
+                println("   Trig functions now expect/return degrees")
+                continue
+            }
+            "mode" -> {
+                val currentMode = calc.getAngleMode()
+                println("📐 Current angle mode: $currentMode")
+                println("   Use 'degrees' or 'radians' to change")
+                continue
+            }
             "clear", "cls" -> {
                 // Clear screen (works on most terminals)
                 print("\u001b[2J\u001b[H")
@@ -59,17 +77,16 @@ fun main() {
             val expr = parser.parse(input)
             val result = calc.eval(expr)
 
-            // Format the result nicely
-            val formattedResult =
-                    if (result == result.toLong().toDouble()) {
-                        // If it's a whole number, display without decimal
-                        result.toLong().toString()
-                    } else {
-                        // Format to reasonable precision
-                        "%.10g".format(result)
-                    }
+            // Format the result with precise display when possible
+            val preciseFormat = PreciseDisplay.formatValue(result, calc.getAngleMode())
+            val angleDescription = PreciseDisplay.getAngleDescription(result, calc.getAngleMode())
 
-            println("  = $formattedResult")
+            if (angleDescription != null && PreciseDisplay.isNiceAngle(result, calc.getAngleMode())
+            ) {
+                println("  = $preciseFormat ($angleDescription)")
+            } else {
+                println("  = $preciseFormat")
+            }
         } catch (e: ParseException) {
             println("❌ Parse Error: ${e.message}")
         } catch (e: ArithmeticException) {
@@ -93,6 +110,9 @@ Commands:
   functions      - List available functions
   constants      - List available constants
   examples       - Show example expressions
+  mode           - Show current angle mode
+  degrees, deg   - Set angle mode to degrees
+  radians, rad   - Set angle mode to radians
   clear, cls     - Clear screen
   quit, exit, q  - Exit calculator
 
@@ -175,9 +195,14 @@ private fun showConstants() {
   SQRT3          - √3 ≈ 1.73205...
   LN2            - ln(2) ≈ 0.69314...
   LN10           - ln(10) ≈ 2.30258...
+  RIGHT_ANGLE    - π/2 ≈ 1.57079...
+  STRAIGHT_ANGLE - π ≈ 3.14159...
+  FULL_CIRCLE    - 2π ≈ 6.28318...
 
 Usage: Use constants directly in expressions
-Example: PI * 2, E^2, PHI * 5, TAU / 4
+Example: PI * 2, E^2, PHI * 5, RIGHT_ANGLE * 2
+
+Note: Angle mode affects trig functions - use 'mode' to check current setting
     """.trimIndent()
     )
 }
@@ -233,6 +258,11 @@ Angle conversion:
   cos(rads(60))
   tan(rads(45))
   degs(rads(180))
+
+Mode-dependent examples (try 'degrees' then 'radians'):
+  sin(30)        - Result depends on current mode
+  cos(60)        - 0.5 in degrees, different in radians
+  asin(0.5)      - Returns 30 in degrees, π/6 in radians
 
 Mixed expressions:
   sqrt(16) + sin(PI/6)

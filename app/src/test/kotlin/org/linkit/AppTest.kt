@@ -511,4 +511,108 @@ class AppTest {
         val complexExpr4 = parser.parse("cos(rads(60)) + sin(rads(30))")
         assertEquals(1.0, calc.eval(complexExpr4), 0.0001) // cos(60°) + sin(30°) = 0.5 + 0.5
     }
+
+    @Test
+    fun testAngleModes() {
+        val parser = Parser()
+
+        // Test DEGREES mode
+        calc.setAngleMode(AngleMode.DEGREES)
+
+        // sin(30°) = 0.5
+        val sin30Expr = parser.parse("sin(30)")
+        assertEquals(0.5, calc.eval(sin30Expr), 0.0001)
+
+        // cos(60°) = 0.5
+        val cos60Expr = parser.parse("cos(60)")
+        assertEquals(0.5, calc.eval(cos60Expr), 0.0001)
+
+        // sin(90°) = 1
+        val sin90Expr = parser.parse("sin(90)")
+        assertEquals(1.0, calc.eval(sin90Expr), 0.0001)
+
+        // asin(0.5) = 30° in degree mode
+        val asin05Expr = parser.parse("asin(0.5)")
+        assertEquals(30.0, calc.eval(asin05Expr), 0.0001)
+
+        // Test RADIANS mode
+        calc.setAngleMode(AngleMode.RADIANS)
+
+        // sin(π/6) = 0.5
+        val sinPI6Expr = parser.parse("sin(PI/6)")
+        assertEquals(0.5, calc.eval(sinPI6Expr), 0.0001)
+
+        // cos(π/3) = 0.5
+        val cosPI3Expr = parser.parse("cos(PI/3)")
+        assertEquals(0.5, calc.eval(cosPI3Expr), 0.0001)
+
+        // sin(π/2) = 1
+        val sinPI2Expr = parser.parse("sin(PI/2)")
+        assertEquals(1.0, calc.eval(sinPI2Expr), 0.0001)
+
+        // asin(0.5) = π/6 in radian mode
+        val asinPI6Expr = parser.parse("asin(0.5)")
+        assertEquals(kotlin.math.PI / 6, calc.eval(asinPI6Expr), 0.0001)
+    }
+
+    @Test
+    fun testNewAngleConstants() {
+        val parser = Parser()
+
+        // Test RIGHT_ANGLE = π/2
+        val rightAngleExpr = parser.parse("RIGHT_ANGLE")
+        assertEquals(kotlin.math.PI / 2, calc.eval(rightAngleExpr), 0.0001)
+
+        // Test STRAIGHT_ANGLE = π
+        val straightAngleExpr = parser.parse("STRAIGHT_ANGLE")
+        assertEquals(kotlin.math.PI, calc.eval(straightAngleExpr), 0.0001)
+
+        // Test FULL_CIRCLE = 2π
+        val fullCircleExpr = parser.parse("FULL_CIRCLE")
+        assertEquals(2 * kotlin.math.PI, calc.eval(fullCircleExpr), 0.0001)
+
+        // Test using constants in expressions
+        val expr = parser.parse("sin(RIGHT_ANGLE)")
+        assertEquals(1.0, calc.eval(expr), 0.0001)
+    }
+
+    @Test
+    fun testPreciseDisplay() {
+        // Test precise formatting of common values
+        assertEquals("π", PreciseDisplay.formatValue(kotlin.math.PI))
+        assertEquals("π/2", PreciseDisplay.formatValue(kotlin.math.PI / 2))
+        assertEquals("π/4", PreciseDisplay.formatValue(kotlin.math.PI / 4))
+        assertEquals("2π", PreciseDisplay.formatValue(2 * kotlin.math.PI))
+        assertEquals("√2", PreciseDisplay.formatValue(kotlin.math.sqrt(2.0)))
+        assertEquals("√3", PreciseDisplay.formatValue(kotlin.math.sqrt(3.0)))
+        assertEquals("φ", PreciseDisplay.formatValue((1 + kotlin.math.sqrt(5.0)) / 2))
+        assertEquals("1/2", PreciseDisplay.formatValue(0.5))
+        assertEquals("1/3", PreciseDisplay.formatValue(1.0 / 3.0))
+
+        // Test degree mode formatting
+        assertEquals("30°", PreciseDisplay.formatValue(30.0, AngleMode.DEGREES))
+        assertEquals("45°", PreciseDisplay.formatValue(45.0, AngleMode.DEGREES))
+        assertEquals("90°", PreciseDisplay.formatValue(90.0, AngleMode.DEGREES))
+        assertEquals("180°", PreciseDisplay.formatValue(180.0, AngleMode.DEGREES))
+    }
+
+    @Test
+    fun testAngleDescriptions() {
+        // Test angle descriptions
+        assertEquals(
+                "right angle",
+                PreciseDisplay.getAngleDescription(kotlin.math.PI / 2, AngleMode.RADIANS)
+        )
+        assertEquals("right angle", PreciseDisplay.getAngleDescription(90.0, AngleMode.DEGREES))
+        assertEquals(
+                "straight angle",
+                PreciseDisplay.getAngleDescription(kotlin.math.PI, AngleMode.RADIANS)
+        )
+        assertEquals("straight angle", PreciseDisplay.getAngleDescription(180.0, AngleMode.DEGREES))
+        assertEquals(
+                "full circle",
+                PreciseDisplay.getAngleDescription(2 * kotlin.math.PI, AngleMode.RADIANS)
+        )
+        assertEquals("full circle", PreciseDisplay.getAngleDescription(360.0, AngleMode.DEGREES))
+    }
 }
