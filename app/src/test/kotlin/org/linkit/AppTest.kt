@@ -446,6 +446,7 @@ class AppTest {
     }
 
     @Test
+    @Suppress("UNUSED_VARIABLE")
     fun testBinaryOperations() {
         val parser = Parser()
 
