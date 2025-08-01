@@ -1,17 +1,56 @@
 package org.linkit.gui
-@file:Suppress("UNRESOLVED_REFERENCE")
+
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
 import org.linkit.AngleMode
 import org.linkit.Calc
 import org.linkit.Parser
 import org.linkit.PreciseDisplay
+
+// Custom calculator dark theme
+private val CalculatorDarkColorScheme =
+        darkColorScheme(
+                primary = Color(0xFF4FC3F7), // Light blue for primary actions
+                secondary = Color(0xFFFFB74D), // Orange for secondary actions
+                tertiary = Color(0xFF81C784), // Green for tertiary actions
+                background = Color(0xFF121212), // Deep black background
+                surface = Color(0xFF1E1E1E), // Dark gray for cards
+                surfaceVariant = Color(0xFF2D2D2D), // Lighter gray for display
+                error = Color(0xFFEF5350), // Red for clear/error
+                onPrimary = Color(0xFF000000), // Black text on primary
+                onSecondary = Color(0xFF000000), // Black text on secondary
+                onTertiary = Color(0xFF000000), // Black text on tertiary
+                onBackground = Color(0xFFE0E0E0), // Light gray text on background
+                onSurface = Color(0xFFE0E0E0), // Light gray text on surface
+                onSurfaceVariant = Color(0xFFBDBDBD), // Medium gray text
+                onError = Color(0xFFFFFFFF), // White text on error
+        )
+
+// Custom calculator light theme
+private val CalculatorLightColorScheme =
+        lightColorScheme(
+                primary = Color(0xFF1976D2), // Blue for primary actions
+                secondary = Color(0xFFFF9800), // Orange for secondary actions
+                tertiary = Color(0xFF4CAF50), // Green for tertiary actions
+                background = Color(0xFFFAFAFA), // Light gray background
+                surface = Color(0xFFFFFFFF), // White for cards
+                surfaceVariant = Color(0xFFF5F5F5), // Very light gray for display
+                error = Color(0xFFD32F2F), // Red for clear/error
+                onPrimary = Color(0xFFFFFFFF), // White text on primary
+                onSecondary = Color(0xFFFFFFFF), // White text on secondary
+                onTertiary = Color(0xFFFFFFFF), // White text on tertiary
+                onBackground = Color(0xFF212121), // Dark gray text on background
+                onSurface = Color(0xFF212121), // Dark gray text on surface
+                onSurfaceVariant = Color(0xFF424242), // Medium gray text
+                onError = Color(0xFFFFFFFF), // White text on error
+        )
 
 fun main() = application {
     var isOpen by remember { mutableStateOf(true) }
@@ -32,17 +71,20 @@ fun CalculatorApp() {
     var displayText by remember { mutableStateOf("0") }
     var currentInput by remember { mutableStateOf("") }
     var angleMode by remember { mutableStateOf(AngleMode.RADIANS) }
+    var isDarkMode by remember { mutableStateOf(true) }
 
     // Update calculator angle mode when state changes
     LaunchedEffect(angleMode) { calc.setAngleMode(angleMode) }
 
-    MaterialTheme {
+    MaterialTheme(
+            colorScheme = if (isDarkMode) CalculatorDarkColorScheme else CalculatorLightColorScheme
+    ) {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Column(
                     modifier = Modifier.fillMaxSize().padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Header with title and angle mode
+                // Header with title and controls
                 Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -53,25 +95,39 @@ fun CalculatorApp() {
                             style = MaterialTheme.typography.headlineSmall
                     )
 
-                    // Angle mode toggle
-                    TextButton(
-                            onClick = {
-                                angleMode =
-                                        if (angleMode == AngleMode.DEGREES) {
-                                            AngleMode.RADIANS
-                                        } else {
-                                            AngleMode.DEGREES
-                                        }
-                            }
+                    Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                                text =
-                                        when (angleMode) {
-                                            AngleMode.DEGREES -> "DEG"
-                                            AngleMode.RADIANS -> "RAD"
-                                        },
-                                color = MaterialTheme.colorScheme.primary
-                        )
+                        // Dark mode toggle
+                        IconButton(onClick = { isDarkMode = !isDarkMode }) {
+                            Text(
+                                    text = if (isDarkMode) "🌙" else "☀️",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+
+                        // Angle mode toggle
+                        TextButton(
+                                onClick = {
+                                    angleMode =
+                                            if (angleMode == AngleMode.DEGREES) {
+                                                AngleMode.RADIANS
+                                            } else {
+                                                AngleMode.DEGREES
+                                            }
+                                }
+                        ) {
+                            Text(
+                                    text =
+                                            when (angleMode) {
+                                                AngleMode.DEGREES -> "DEG"
+                                                AngleMode.RADIANS -> "RAD"
+                                            },
+                                    color = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 }
 
@@ -122,7 +178,11 @@ fun CalculatorApp() {
 fun CalculatorDisplay(displayText: String, currentInput: String, modifier: Modifier = Modifier) {
     Card(
             modifier = modifier.fillMaxWidth(),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            colors =
+                    CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
     ) {
         Column(
                 modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -243,7 +303,8 @@ fun CalculatorButtonGrid(
                     modifier = Modifier.weight(1f),
                     colors =
                             ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.error
+                                    containerColor = MaterialTheme.colorScheme.error,
+                                    contentColor = MaterialTheme.colorScheme.onError
                             )
             ) { Text("Clear") }
 
@@ -252,7 +313,8 @@ fun CalculatorButtonGrid(
                     modifier = Modifier.weight(1f),
                     colors =
                             ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.secondary
+                                    containerColor = MaterialTheme.colorScheme.secondary,
+                                    contentColor = MaterialTheme.colorScheme.onSecondary
                             )
             ) { Text("⌫") }
 
@@ -261,7 +323,8 @@ fun CalculatorButtonGrid(
                     modifier = Modifier.weight(2f),
                     colors =
                             ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary
                             )
             ) { Text("=", style = MaterialTheme.typography.titleLarge) }
         }
@@ -291,7 +354,12 @@ fun CalculatorButton(text: String, onInput: (String) -> Unit, modifier: Modifier
                         }
                 onInput(input)
             },
-            modifier = modifier
+            modifier = modifier,
+            colors =
+                    ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                            containerColor = MaterialTheme.colorScheme.surface
+                    )
     ) { Text(text = text, style = MaterialTheme.typography.bodyMedium) }
 }
 
