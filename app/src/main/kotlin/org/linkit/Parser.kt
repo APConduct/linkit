@@ -224,7 +224,54 @@ class ExpressionParser(private val tokens: List<Token>) {
                 // Check if it's a function call
                 val name = token.name.lowercase()
                 when (name) {
-                    "sin", "cos", "tan", "sqrt", "ln", "log10", "abs" -> {
+                    "sin",
+                    "cos",
+                    "tan",
+                    "cot",
+                    "sec",
+                    "csc",
+                    "asin",
+                    "acos",
+                    "atan",
+                    "acot",
+                    "asec",
+                    "acsc",
+                    "arcsin",
+                    "arccos",
+                    "arctan",
+                    "arccot",
+                    "arcsec",
+                    "arccsc",
+                    "sinh",
+                    "cosh",
+                    "tanh",
+                    "coth",
+                    "sech",
+                    "csch",
+                    "asinh",
+                    "acosh",
+                    "atanh",
+                    "acoth",
+                    "asech",
+                    "acsch",
+                    "sqrt",
+                    "ln",
+                    "log10",
+                    "log2",
+                    "exp",
+                    "log1p",
+                    "abs",
+                    "floor",
+                    "ceil",
+                    "round",
+                    "sign",
+                    "not",
+                    "fact",
+                    "factorial",
+                    "isprime",
+                    "iseven",
+                    "isodd",
+                    "factors" -> {
                         consume()
                         val operand = parsePrimary()
                         val operation =
@@ -232,10 +279,44 @@ class ExpressionParser(private val tokens: List<Token>) {
                                     "sin" -> Operation.Unary.Sin
                                     "cos" -> Operation.Unary.Cos
                                     "tan" -> Operation.Unary.Tan
+                                    "cot" -> Operation.Unary.Cot
+                                    "sec" -> Operation.Unary.Sec
+                                    "csc" -> Operation.Unary.Csc
+                                    "asin", "arcsin" -> Operation.Unary.Arcsin
+                                    "acos", "arccos" -> Operation.Unary.Arccos
+                                    "atan", "arctan" -> Operation.Unary.Arctan
+                                    "acot", "arccot" -> Operation.Unary.Arccot
+                                    "asec", "arcsec" -> Operation.Unary.Arcsec
+                                    "acsc", "arccsc" -> Operation.Unary.Arccsc
+                                    "sinh" -> Operation.Unary.Sinh
+                                    "cosh" -> Operation.Unary.Cosh
+                                    "tanh" -> Operation.Unary.Tanh
+                                    "coth" -> Operation.Unary.Coth
+                                    "sech" -> Operation.Unary.Sech
+                                    "csch" -> Operation.Unary.Csch
+                                    "asinh" -> Operation.Unary.Asinh
+                                    "acosh" -> Operation.Unary.Acosh
+                                    "atanh" -> Operation.Unary.Atanh
+                                    "acoth" -> Operation.Unary.Acoth
+                                    "asech" -> Operation.Unary.Asech
+                                    "acsch" -> Operation.Unary.Acsch
                                     "sqrt" -> Operation.Unary.Sqrt
                                     "ln" -> Operation.Unary.Ln
                                     "log10" -> Operation.Unary.Log10
+                                    "log2" -> Operation.Unary.Log2
+                                    "exp" -> Operation.Unary.Exp
+                                    "log1p" -> Operation.Unary.Log1p
                                     "abs" -> Operation.Unary.Abs
+                                    "floor" -> Operation.Unary.Floor
+                                    "ceil" -> Operation.Unary.Ceil
+                                    "round" -> Operation.Unary.Round
+                                    "sign" -> Operation.Unary.Sign
+                                    "not" -> Operation.Unary.Not
+                                    "fact", "factorial" -> Operation.Unary.Factorial
+                                    "isprime" -> Operation.Unary.IsPrime
+                                    "iseven" -> Operation.Unary.IsEven
+                                    "isodd" -> Operation.Unary.IsOdd
+                                    "factors" -> Operation.Unary.Factors
                                     else -> throw ParseException("Unknown function: $name")
                                 }
                         return Expr.UnaryOp(operation, operand)

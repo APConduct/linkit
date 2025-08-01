@@ -115,20 +115,44 @@ private fun showFunctions() {
 ====================
 
 Trigonometric:
-  sin(x)         - Sine
-  cos(x)         - Cosine
-  tan(x)         - Tangent
+  sin(x), cos(x), tan(x)     - Basic trig functions
+  cot(x), sec(x), csc(x)     - Other trig functions
+  asin(x), acos(x), atan(x)  - Inverse trig functions
+  acot(x), asec(x), acsc(x)  - More inverse trig functions
+
+Hyperbolic:
+  sinh(x), cosh(x), tanh(x)  - Hyperbolic functions
+  coth(x), sech(x), csch(x)  - Other hyperbolic functions
+  asinh(x), acosh(x), atanh(x) - Inverse hyperbolic functions
+  acoth(x), asech(x), acsch(x) - More inverse hyperbolic functions
 
 Algebraic:
   sqrt(x)        - Square root
   abs(x)         - Absolute value
+  sign(x)        - Sign function (-1, 0, 1)
+  floor(x)       - Floor (round down)
+  ceil(x)        - Ceiling (round up)
+  round(x)       - Round to nearest integer
 
 Logarithmic:
   ln(x)          - Natural logarithm
   log10(x)       - Base-10 logarithm
+  log2(x)        - Base-2 logarithm
+  exp(x)         - Exponential (e^x)
+  log1p(x)       - ln(1 + x)
+
+Number Theory:
+  fact(x)        - Factorial
+  isprime(x)     - Check if prime (returns 1 or 0)
+  iseven(x)      - Check if even (returns 1 or 0)
+  isodd(x)       - Check if odd (returns 1 or 0)
+  factors(x)     - Count of factors
+
+Logic:
+  not(x)         - Logical NOT (0 becomes 1, non-zero becomes 0)
 
 Usage: function_name(expression)
-Example: sin(PI/2), sqrt(16), ln(E)
+Example: sin(PI/2), sqrt(16), fact(5), isprime(17)
     """.trimIndent()
     )
 }
@@ -141,9 +165,15 @@ private fun showConstants() {
 
   PI             - π ≈ 3.14159...
   E              - Euler's number ≈ 2.71828...
+  PHI            - Golden ratio ≈ 1.61803...
+  TAU            - τ = 2π ≈ 6.28318...
+  SQRT2          - √2 ≈ 1.41421...
+  SQRT3          - √3 ≈ 1.73205...
+  LN2            - ln(2) ≈ 0.69314...
+  LN10           - ln(10) ≈ 2.30258...
 
 Usage: Use constants directly in expressions
-Example: PI * 2, E^2
+Example: PI * 2, E^2, PHI * 5, TAU / 4
     """.trimIndent()
     )
 }
@@ -168,12 +198,35 @@ Trigonometry:
   sin(PI/2)
   cos(0)
   tan(PI/4)
+  asin(0.5)
+
+Hyperbolic functions:
+  sinh(1)
+  cosh(0)
+  tanh(2)
+
+Number theory:
+  fact(5)
+  isprime(17)
+  iseven(42)
+  factors(12)
+
+Logarithms:
+  ln(E)
+  log10(100)
+  log2(8)
+  exp(1)
+
+Rounding:
+  floor(3.7)
+  ceil(3.2)
+  round(3.5)
 
 Mixed expressions:
   sqrt(16) + sin(PI/6)
-  2 * PI * 5
-  ln(E^3)
-  abs(-42)
+  fact(4) + log2(8)
+  PHI * TAU / 2
+  abs(-42) + sign(-5)
 
 Try entering any of these expressions!
     """.trimIndent()

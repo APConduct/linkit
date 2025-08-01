@@ -5,7 +5,7 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlin.math.tan
 
-class Degree{
+class Degree {
     var value: Double = 0.0
     constructor(value: Double) {
         this.value = value
@@ -14,21 +14,23 @@ class Degree{
         this.value = value.toDouble()
     }
     public fun to_radian(): Radian {
-        if (value < 0 || value > 360) throw IllegalArgumentException("Degree value must be between 0 and 360")
+        if (value < 0 || value > 360)
+                throw IllegalArgumentException("Degree value must be between 0 and 360")
         return Radian((value * kotlin.math.PI / 180).toInt(), 1)
     }
 }
 
 //// Represents an angle in radians, with numerator and denominator for precision
-// This class allows for precise representation of angles in radians, useful for trigonometric calculations
+// This class allows for precise representation of angles in radians, useful for trigonometric
+// calculations
 // It supports operations like conversion to degrees and evaluation of trigonometric functions
 // The value is calculated as (numerator/denominator) * π, ensuring high precision
 // Usage: Radian(numerator, denominator)
-class Radian{
+class Radian {
     var coef_numer: Int = 0
     var coef_denom: Int = 1
     public fun value(): Double {
-        return (coef_numer/coef_denom).toDouble() * kotlin.math.PI
+        return (coef_numer / coef_denom).toDouble() * kotlin.math.PI
     }
     constructor(numerator: Int, denominator: Int) {
         if (denominator == 0) throw IllegalArgumentException("Denominator cannot be zero")
@@ -47,6 +49,11 @@ private fun factorial(n: Int): Double {
     return if (n == 0) 1.0 else n * factorial(n - 1)
 }
 
+private fun gcd(a: Int, b: Int): Int {
+    if (b == 0) return a
+    return gcd(b, a % b)
+}
+
 sealed class Operation {
     sealed class Binary : Operation() {
         object Add : Binary()
@@ -56,26 +63,23 @@ sealed class Operation {
         object Power : Binary()
         object Modulo : Binary()
 
-        object Min : Unary() // Minimum of a set of numbers
-        object Max : Unary() // Maximum of a set of numbers
-        object Mean : Unary() // Arithmetic mean
-        object Median : Unary() // Median of a set of numbers
-        object Mode : Unary() // Mode of a set of numbers
-        // object Variance : Unary() // Variance of a set of numbers
-        object StdDev : Unary() // Standard deviation of a set of numbers
-
+        object Min : Binary() // Minimum of a set of numbers
+        object Max : Binary() // Maximum of a set of numbers
+        object Mean : Binary() // Arithmetic mean
+        object Median : Binary() // Median of a set of numbers
+        object Mode : Binary() // Mode of a set of numbers
+        object Variance : Binary() // Variance of a set of numbers
+        object StdDev : Binary() // Standard deviation of a set of numbers
 
         object GCD : Binary() // Greatest Common Divisor
         object LCM : Binary() // Least Common Multiple
 
-        object And : Unary() // Logical AND
-        // object Or : Unary() // Logical OR
+        object And : Binary() // Logical AND
         object ShiftLeft : Binary() // Bitwise left shift
-        // object ShiftRight : Binary() // Bitwise right shift
+        object ShiftRight : Binary() // Bitwise right shift
         // object Xor : Binary() // Bitwise XOR
         // object BitwiseAnd : Binary() // Bitwise AND
         // object BitwiseOr : Binary() // Bitwise OR
-        // object BitwiseNot : Unary() // Bitwise NOT
         // object Nand : Binary() // Logical NAND
         // object Nor : Binary() // Logical NOR
         // object Xnor : Binary() // Logical XNOR
@@ -85,7 +89,6 @@ sealed class Operation {
     }
     sealed class Unary : Operation() {
         object Not : Unary() // Logical NOT
-
 
         object Negate : Unary()
         object Sin : Unary()
@@ -133,23 +136,15 @@ sealed class Operation {
         object IsOdd : Unary() // Check if a number is odd
         object Factors : Unary() // Get factors of a number
 
-        // object Sign : Unary() // Sign function
-
-        object Phi : Unary() // Golden ratio (phi)
-        object Tau : Unary() // Tau constant (τ = 2π)
-        object SQRT2 : Unary() // Square root of 2
-        object SQRT3 : Unary() // Square root of 3
-        object LN2 : Unary() // Natural logarithm of 2
-        object LN10 : Unary() // Natural logarithm of 10
-
+        object Sign : Unary() // Sign function
 
         object Floor : Unary()
         object Ceil : Unary()
         object Round : Unary()
         // object Signum : Unary()
         // object Trunc : Unary()
-        // object Log2 : Unary()
-        // object LogN : Unary() // Logarithm with base N
+        object Log2 : Unary()
+        object LogN : Unary() // Logarithm with base N
         object Exp : Unary() // Exponential function
         object Log1p : Unary() // Logarithm of (1 + x)
         // object Expm1 : Unary() // Exponential minus 1
@@ -164,7 +159,17 @@ sealed class Expr {
 }
 
 class Calc {
-    private val constants = mapOf("PI" to kotlin.math.PI, "E" to kotlin.math.E)
+    private val constants =
+            mapOf(
+                    "PI" to kotlin.math.PI,
+                    "E" to kotlin.math.E,
+                    "PHI" to (1 + kotlin.math.sqrt(5.0)) / 2,
+                    "TAU" to 2 * kotlin.math.PI,
+                    "SQRT2" to kotlin.math.sqrt(2.0),
+                    "SQRT3" to kotlin.math.sqrt(3.0),
+                    "LN2" to kotlin.math.ln(2.0),
+                    "LN10" to kotlin.math.ln(10.0)
+            )
 
     fun eval(expr: Expr): Double =
             when (expr) {
@@ -193,10 +198,62 @@ class Calc {
                 }
                 Operation.Binary.Power -> left.pow(right)
                 Operation.Binary.Modulo -> left % right
+                Operation.Binary.Min -> kotlin.math.min(left, right)
+                Operation.Binary.Max -> kotlin.math.max(left, right)
+                Operation.Binary.Mean -> (left + right) / 2
+                Operation.Binary.Median -> (left + right) / 2 // Simplified for two numbers
+                Operation.Binary.Mode ->
+                        left // Mode is not defined for two numbers, returning left as default
+                Operation.Binary.Variance ->
+                        throw NotImplementedError("Variance calculation not implemented")
+                Operation.Binary.StdDev ->
+                        kotlin.math.sqrt((left - right).pow(2) / 2) // Simplified for two numbers
+                Operation.Binary.GCD -> {
+                    if (left < 0 || right < 0)
+                            throw ArithmeticException("GCD is not defined for negative numbers")
+                    gcd(left.toInt(), right.toInt()).toDouble()
+                }
+                Operation.Binary.LCM -> {
+                    if (left < 0 || right < 0)
+                            throw ArithmeticException("LCM is not defined for negative numbers")
+                    (left * right / gcd(left.toInt(), right.toInt())).toDouble()
+                }
+                Operation.Binary.And -> if (left != 0.0 && right != 0.0) 1.0 else 0.0
+                // Operation.Binary.Or -> if (left != 0.0 || right != 0
+                Operation.Binary.ShiftLeft -> {
+                    if (left < 0 || right < 0)
+                            throw ArithmeticException(
+                                    "Shift operations are not defined for negative numbers"
+                            )
+                    (left.toInt() shl right.toInt()).toDouble()
+                }
+                Operation.Binary.ShiftRight -> {
+                    if (left < 0 || right < 0)
+                            throw ArithmeticException(
+                                    "Shift operations are not defined for negative numbers"
+                            )
+                    (left.toInt() shr right.toInt()).toDouble()
+                }
             }
 
     private fun evaluate_unary(op: Operation.Unary, operand: Double): Double =
             when (op) {
+                Operation.Unary.Not -> if (operand == 0.0) 1.0 else 0.0 // Logical NOT
+                Operation.Unary.Log2 -> {
+                    if (operand <= 0) throw ArithmeticException("Logarithm of non-positive number")
+                    kotlin.math.log2(operand)
+                }
+                Operation.Unary.LogN -> {
+                    if (operand <= 0) throw ArithmeticException("Logarithm of non-positive number")
+                    kotlin.math.log(operand, E) // Natural logarithm as default
+                }
+                Operation.Unary.Sign -> {
+                    when {
+                        operand > 0 -> 1.0
+                        operand < 0 -> -1.0
+                        else -> 0.0
+                    }
+                }
                 Operation.Unary.Negate -> -operand
                 Operation.Unary.Sin -> kotlin.math.sin(operand)
                 Operation.Unary.Cos -> kotlin.math.cos(operand)
@@ -210,14 +267,12 @@ class Calc {
                 Operation.Unary.Arccot -> kotlin.math.atan(1 / operand)
                 Operation.Unary.Arcsec -> kotlin.math.acos(1 / operand)
                 Operation.Unary.Arccsc -> kotlin.math.asin(1 / operand)
-
                 Operation.Unary.Sinh -> kotlin.math.sinh(operand)
                 Operation.Unary.Cosh -> kotlin.math.cosh(operand)
                 Operation.Unary.Tanh -> kotlin.math.tanh(operand)
                 Operation.Unary.Coth -> 1 / kotlin.math.tanh(operand)
                 Operation.Unary.Sech -> 1 / kotlin.math.cosh(operand)
                 Operation.Unary.Csch -> 1 / kotlin.math.sinh(operand)
-
                 Operation.Unary.Asinh -> kotlin.math.asinh(operand)
                 Operation.Unary.Acosh -> {
                     if (operand < 1) throw ArithmeticException("Acosh is only defined for x >= 1")
@@ -241,7 +296,6 @@ class Calc {
                     if (operand == 0.0) throw ArithmeticException("Acsch is undefined for zero")
                     kotlin.math.asinh(1 / operand)
                 }
-
                 Operation.Unary.Sqrt -> {
                     if (operand < 0) throw ArithmeticException("Square root of negative number")
                     kotlin.math.sqrt(operand)
@@ -257,9 +311,70 @@ class Calc {
                 }
                 Operation.Unary.Abs -> kotlin.math.abs(operand)
                 Operation.Unary.Factorial -> {
-                    if (operand < 0 || )
+                    if (operand < 0 || operand != operand.toInt().toDouble())
                             throw ArithmeticException("Factorial of negative or non-integer number")
                     factorial(operand.toInt())
+                }
+                Operation.Unary.IsPrime -> {
+                    if (operand != operand.toInt().toDouble() || operand < 2) {
+                        0.0 // Not prime
+                    } else if (operand == 2.0) {
+                        1.0 // Prime
+                    } else if (operand % 2 == 0.0) {
+                        0.0 // Even numbers > 2 are not prime
+                    } else {
+                        var isPrime = true
+                        for (i in 3..sqrt(operand).toInt() step 2) {
+                            if (operand % i == 0.0) {
+                                isPrime = false
+                                break
+                            }
+                        }
+                        if (isPrime) 1.0 else 0.0
+                    }
+                }
+                Operation.Unary.IsEven -> {
+                    if (operand != operand.toInt().toDouble()) 0.0
+                    else if (operand % 2 == 0.0) 1.0 else 0.0
+                }
+                Operation.Unary.IsOdd -> {
+                    if (operand != operand.toInt().toDouble()) 0.0
+                    else if (operand % 2 != 0.0) 1.0 else 0.0
+                }
+                Operation.Unary.Factors -> {
+                    if (operand < 1 || operand != operand.toInt().toDouble())
+                            throw ArithmeticException(
+                                    "Factors are only defined for positive integers"
+                            )
+                    var count = 0.0
+                    for (i in 1..operand.toInt()) {
+                        if (operand % i == 0.0) {
+                            count++
+                        }
+                    }
+                    count
+                }
+                Operation.Unary.Floor -> kotlin.math.floor(operand)
+                Operation.Unary.Ceil -> kotlin.math.ceil(operand)
+                Operation.Unary.Round -> kotlin.math.round(operand).toDouble()
+                // Operation.Unary.Signum -> kotlin.math.sign(operand)
+                // Operation.Unary.Trunc -> operand.toInt().toDouble() // Truncate to Int
+                // Operation.Unary.Log2 -> kotlin.math.log2(operand)
+                // Operation.Unary.LogN -> {
+                //     if (operand <= 0) throw ArithmeticException("Logarithm of non-positive
+                // number")
+                //     kotlin.math.log(operand, N) // Logarithm with base N
+                // }
+                Operation.Unary.Exp -> kotlin.math.exp(operand) // Exponential function
+                // Operation.Unary.Expm1 -> kotlin.math.expm1(operand) // Exponential minus 1
+                //
+                // // Logarithm of (1 + x)
+                Operation.Unary.Log1p -> {
+                    if (operand <= -1)
+                            throw ArithmeticException(
+                                    "Logarithm of (1 + x) is undefined for x <= -1"
+                            )
+                    kotlin.math.ln(1 + operand)
                 }
             }
 }

@@ -276,4 +276,205 @@ class AppTest {
         println("✓ Interactive CLI interface")
         println("\n🚀 To use the interactive calculator, run: ./gradlew run")
     }
+
+    @Test
+    fun testNewTrigonometricFunctions() {
+        val parser = Parser()
+
+        // Test cot(PI/4) = 1
+        val cotExpr = parser.parse("cot(PI/4)")
+        assertEquals(1.0, calc.eval(cotExpr), 0.0001)
+
+        // Test sec(0) = 1
+        val secExpr = parser.parse("sec(0)")
+        assertEquals(1.0, calc.eval(secExpr), 0.0001)
+
+        // Test asin(0.5) ≈ PI/6
+        val asinExpr = parser.parse("asin(0.5)")
+        assertEquals(kotlin.math.PI / 6, calc.eval(asinExpr), 0.0001)
+
+        // Test acos(0.5) ≈ PI/3
+        val acosExpr = parser.parse("acos(0.5)")
+        assertEquals(kotlin.math.PI / 3, calc.eval(acosExpr), 0.0001)
+    }
+
+    @Test
+    fun testHyperbolicFunctions() {
+        val parser = Parser()
+
+        // Test sinh(0) = 0
+        val sinhExpr = parser.parse("sinh(0)")
+        assertEquals(0.0, calc.eval(sinhExpr), 0.0001)
+
+        // Test cosh(0) = 1
+        val coshExpr = parser.parse("cosh(0)")
+        assertEquals(1.0, calc.eval(coshExpr), 0.0001)
+
+        // Test tanh(0) = 0
+        val tanhExpr = parser.parse("tanh(0)")
+        assertEquals(0.0, calc.eval(tanhExpr), 0.0001)
+
+        // Test asinh(0) = 0
+        val asinhExpr = parser.parse("asinh(0)")
+        assertEquals(0.0, calc.eval(asinhExpr), 0.0001)
+    }
+
+    @Test
+    fun testFactorialFunction() {
+        val parser = Parser()
+
+        // Test fact(5) = 120
+        val factExpr = parser.parse("fact(5)")
+        assertEquals(120.0, calc.eval(factExpr), 0.0001)
+
+        // Test fact(0) = 1
+        val fact0Expr = parser.parse("fact(0)")
+        assertEquals(1.0, calc.eval(fact0Expr), 0.0001)
+
+        // Test factorial alias
+        val factorialExpr = parser.parse("factorial(4)")
+        assertEquals(24.0, calc.eval(factorialExpr), 0.0001)
+    }
+
+    @Test
+    fun testPrimeAndNumberTheoryFunctions() {
+        val parser = Parser()
+
+        // Test isprime(7) = 1 (true)
+        val prime7Expr = parser.parse("isprime(7)")
+        assertEquals(1.0, calc.eval(prime7Expr), 0.0001)
+
+        // Test isprime(8) = 0 (false)
+        val prime8Expr = parser.parse("isprime(8)")
+        assertEquals(0.0, calc.eval(prime8Expr), 0.0001)
+
+        // Test iseven(4) = 1 (true)
+        val even4Expr = parser.parse("iseven(4)")
+        assertEquals(1.0, calc.eval(even4Expr), 0.0001)
+
+        // Test isodd(5) = 1 (true)
+        val odd5Expr = parser.parse("isodd(5)")
+        assertEquals(1.0, calc.eval(odd5Expr), 0.0001)
+
+        // Test factors(6) = 4 (factors: 1, 2, 3, 6)
+        val factors6Expr = parser.parse("factors(6)")
+        assertEquals(4.0, calc.eval(factors6Expr), 0.0001)
+    }
+
+    @Test
+    fun testRoundingFunctions() {
+        val parser = Parser()
+
+        // Test floor(3.7) = 3
+        val floorExpr = parser.parse("floor(3.7)")
+        assertEquals(3.0, calc.eval(floorExpr), 0.0001)
+
+        // Test ceil(3.2) = 4
+        val ceilExpr = parser.parse("ceil(3.2)")
+        assertEquals(4.0, calc.eval(ceilExpr), 0.0001)
+
+        // Test round(3.5) = 4
+        val roundExpr = parser.parse("round(3.5)")
+        assertEquals(4.0, calc.eval(roundExpr), 0.0001)
+
+        // Test round(3.4) = 3
+        val round2Expr = parser.parse("round(3.4)")
+        assertEquals(3.0, calc.eval(round2Expr), 0.0001)
+    }
+
+    @Test
+    fun testNewLogarithmicFunctions() {
+        val parser = Parser()
+
+        // Test log2(8) = 3
+        val log2Expr = parser.parse("log2(8)")
+        assertEquals(3.0, calc.eval(log2Expr), 0.0001)
+
+        // Test exp(1) ≈ E
+        val expExpr = parser.parse("exp(1)")
+        assertEquals(kotlin.math.E, calc.eval(expExpr), 0.0001)
+
+        // Test log1p(0) = 0
+        val log1pExpr = parser.parse("log1p(0)")
+        assertEquals(0.0, calc.eval(log1pExpr), 0.0001)
+    }
+
+    @Test
+    fun testNewConstants() {
+        val parser = Parser()
+
+        // Test PHI (golden ratio)
+        val phiExpr = parser.parse("PHI")
+        assertEquals((1 + kotlin.math.sqrt(5.0)) / 2, calc.eval(phiExpr), 0.0001)
+
+        // Test TAU = 2*PI
+        val tauExpr = parser.parse("TAU")
+        assertEquals(2 * kotlin.math.PI, calc.eval(tauExpr), 0.0001)
+
+        // Test SQRT2
+        val sqrt2Expr = parser.parse("SQRT2")
+        assertEquals(kotlin.math.sqrt(2.0), calc.eval(sqrt2Expr), 0.0001)
+
+        // Test LN2
+        val ln2Expr = parser.parse("LN2")
+        assertEquals(kotlin.math.ln(2.0), calc.eval(ln2Expr), 0.0001)
+    }
+
+    @Test
+    fun testLogicalAndUtilityFunctions() {
+        val parser = Parser()
+
+        // Test not(0) = 1
+        val notExpr = parser.parse("not(0)")
+        assertEquals(1.0, calc.eval(notExpr), 0.0001)
+
+        // Test not(5) = 0
+        val not2Expr = parser.parse("not(5)")
+        assertEquals(0.0, calc.eval(not2Expr), 0.0001)
+
+        // Test sign(5) = 1
+        val signPosExpr = parser.parse("sign(5)")
+        assertEquals(1.0, calc.eval(signPosExpr), 0.0001)
+
+        // Test sign(-3) = -1
+        val signNegExpr = parser.parse("sign(-3)")
+        assertEquals(-1.0, calc.eval(signNegExpr), 0.0001)
+
+        // Test sign(0) = 0
+        val signZeroExpr = parser.parse("sign(0)")
+        assertEquals(0.0, calc.eval(signZeroExpr), 0.0001)
+    }
+
+    @Test
+    fun testBinaryOperations() {
+        val parser = Parser()
+
+        // Test min function
+        val minExpr =
+                parser.parse("5") // We'll need to extend this when we add proper min/max syntax
+        // For now, these are binary operations that work with the existing structure
+
+        // Test GCD
+        // Note: This tests the internal binary operations, but we'd need to extend
+        // the parser to handle functions with two arguments like gcd(12, 8)
+    }
+
+    @Test
+    fun testComplexExpressions() {
+        val parser = Parser()
+
+        // Test combining new functions
+        val complexExpr1 = parser.parse("fact(4) + log2(8)")
+        assertEquals(27.0, calc.eval(complexExpr1), 0.0001) // 24 + 3
+
+        // Test using new constants
+        val complexExpr2 = parser.parse("PHI * TAU / 2")
+        val expected = ((1 + kotlin.math.sqrt(5.0)) / 2) * (2 * kotlin.math.PI) / 2
+        assertEquals(expected, calc.eval(complexExpr2), 0.0001)
+
+        // Test hyperbolic and trig together
+        val complexExpr3 = parser.parse("sinh(1) + sin(PI/2)")
+        val expectedResult = kotlin.math.sinh(1.0) + 1.0
+        assertEquals(expectedResult, calc.eval(complexExpr3), 0.0001)
+    }
 }
