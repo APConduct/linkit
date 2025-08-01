@@ -10,6 +10,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.*
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
 import org.linkit.AngleMode
@@ -75,7 +77,7 @@ fun CalculatorApp(isDarkModeExternal: Boolean = true, onDarkModeChange: (Boolean
     val calc = remember { Calc() }
     val parser = remember { Parser() }
     var displayText by remember { mutableStateOf("0") }
-    var currentInput by remember { mutableStateOf("") }
+    var currentInput by remember { mutableStateOf(TextFieldValue("")) }
     var angleMode by remember { mutableStateOf(AngleMode.RADIANS) }
     var isDarkMode by remember { mutableStateOf(isDarkModeExternal) }
 
@@ -159,16 +161,16 @@ fun CalculatorApp(isDarkModeExternal: Boolean = true, onDarkModeChange: (Boolean
                         onInputChange = { currentInput = it },
                         onCalculate = {
                             try {
-                                if (currentInput.isNotEmpty()) {
-                                    val expr = parser.parse(currentInput)
+                                if (currentInput.text.isNotEmpty()) {
+                                    val expr = parser.parse(currentInput.text)
                                     val result = calc.eval(expr)
                                     displayText =
                                             PreciseDisplay.formatValue(result, calc.getAngleMode())
-                                    currentInput = ""
+                                    currentInput = TextFieldValue("")
                                 }
                             } catch (e: Exception) {
                                 displayText = "Error: ${e.message}"
-                                currentInput = ""
+                                currentInput = TextFieldValue("")
                             }
                         }
                 )
@@ -180,27 +182,70 @@ fun CalculatorApp(isDarkModeExternal: Boolean = true, onDarkModeChange: (Boolean
 
                 // Button grid
                 CalculatorButtonGrid(
-                        onInput = { input -> currentInput += input },
+                        onInput = { input ->
+                            val isFunction =
+                                    input in
+                                            listOf(
+                                                    "sin()",
+                                                    "cos()",
+                                                    "tan()",
+                                                    "sqrt()",
+                                                    "ln()",
+                                                    "log10()",
+                                                    "exp()",
+                                                    "fact()",
+                                                    "abs()",
+                                                    "floor()",
+                                                    "ceil()",
+                                                    "round()",
+                                                    "rads()",
+                                                    "degs()"
+                                            )
+
+                            if (isFunction) {
+                                val newText = currentInput.text + input
+                                currentInput =
+                                        TextFieldValue(
+                                                text = newText,
+                                                selection =
+                                                        TextRange(
+                                                                newText.length - 1
+                                                        ) // Position cursor before closing )
+                                        )
+                            } else {
+                                val newText = currentInput.text + input
+                                currentInput =
+                                        TextFieldValue(
+                                                text = newText,
+                                                selection = TextRange(newText.length)
+                                        )
+                            }
+                        },
                         onEquals = {
                             try {
-                                if (currentInput.isNotEmpty()) {
-                                    val expr = parser.parse(currentInput)
+                                if (currentInput.text.isNotEmpty()) {
+                                    val expr = parser.parse(currentInput.text)
                                     val result = calc.eval(expr)
                                     displayText = PreciseDisplay.formatValue(result, angleMode)
-                                    currentInput = ""
+                                    currentInput = TextFieldValue("")
                                 }
                             } catch (e: Exception) {
                                 displayText = "Error: ${e.message}"
-                                currentInput = ""
+                                currentInput = TextFieldValue("")
                             }
                         },
                         onClear = {
-                            currentInput = ""
+                            currentInput = TextFieldValue("")
                             displayText = "0"
                         },
                         onBackspace = {
-                            if (currentInput.isNotEmpty()) {
-                                currentInput = currentInput.dropLast(1)
+                            if (currentInput.text.isNotEmpty()) {
+                                val newText = currentInput.text.dropLast(1)
+                                currentInput =
+                                        TextFieldValue(
+                                                text = newText,
+                                                selection = TextRange(newText.length)
+                                        )
                             }
                         },
                         modifier = Modifier.weight(0.8f)
@@ -212,9 +257,9 @@ fun CalculatorApp(isDarkModeExternal: Boolean = true, onDarkModeChange: (Boolean
 
 @Composable
 fun CalculatorInput(
-        currentInput: String,
+        currentInput: TextFieldValue,
         modifier: Modifier = Modifier,
-        onInputChange: (String) -> Unit = {},
+        onInputChange: (TextFieldValue) -> Unit = {},
         onCalculate: () -> Unit = {}
 ) {
     Card(
@@ -228,28 +273,7 @@ fun CalculatorInput(
         ) {
             SmartInputField(
                     value = currentInput,
-                    onValueChange = { newValue ->
-                        // Smart parentheses completion
-                        val smartValue =
-                                when {
-                                    newValue.endsWith("sin(") ||
-                                            newValue.endsWith("cos(") ||
-                                            newValue.endsWith("tan(") ||
-                                            newValue.endsWith("sqrt(") ||
-                                            newValue.endsWith("ln(") ||
-                                            newValue.endsWith("log10(") ||
-                                            newValue.endsWith("exp(") ||
-                                            newValue.endsWith("fact(") ||
-                                            newValue.endsWith("abs(") ||
-                                            newValue.endsWith("floor(") ||
-                                            newValue.endsWith("ceil(") ||
-                                            newValue.endsWith("round(") -> {
-                                        if (!newValue.endsWith("()")) newValue else newValue
-                                    }
-                                    else -> newValue
-                                }
-                        onInputChange(smartValue)
-                    },
+                    onValueChange = onInputChange,
                     onEnterPressed = onCalculate,
                     modifier = Modifier.fillMaxWidth()
             )
@@ -415,10 +439,16 @@ fun CalculatorButton(text: String, onInput: (String) -> Unit, modifier: Modifier
                                                 "ln",
                                                 "log10",
                                                 "exp",
-                                                "fact"
+                                                "fact",
+                                                "abs",
+                                                "floor",
+                                                "ceil",
+                                                "round",
+                                                "rads",
+                                                "degs"
                                         )
                         ) {
-                            "$text("
+                            "$text()"
                         } else {
                             text
                         }
@@ -436,8 +466,8 @@ fun CalculatorButton(text: String, onInput: (String) -> Unit, modifier: Modifier
 
 @Composable
 fun SmartInputField(
-        value: String,
-        onValueChange: (String) -> Unit,
+        value: TextFieldValue,
+        onValueChange: (TextFieldValue) -> Unit,
         onEnterPressed: () -> Unit,
         modifier: Modifier = Modifier
 ) {
@@ -446,29 +476,123 @@ fun SmartInputField(
     OutlinedTextField(
             value = value,
             onValueChange = { newValue ->
-                // Smart features
+                // Smart parentheses completion and cursor positioning
                 val processedValue =
                         when {
-                            // Auto-complete function parentheses
-                            newValue.endsWith("sin") && !value.endsWith("sin") -> "${newValue}("
-                            newValue.endsWith("cos") && !value.endsWith("cos") -> "${newValue}("
-                            newValue.endsWith("tan") && !value.endsWith("tan") -> "${newValue}("
-                            newValue.endsWith("sqrt") && !value.endsWith("sqrt") -> "${newValue}("
-                            newValue.endsWith("ln") && !value.endsWith("ln") -> "${newValue}("
-                            newValue.endsWith("log10") && !value.endsWith("log10") -> "${newValue}("
-                            newValue.endsWith("exp") && !value.endsWith("exp") -> "${newValue}("
-                            newValue.endsWith("fact") && !value.endsWith("fact") -> "${newValue}("
-                            newValue.endsWith("abs") && !value.endsWith("abs") -> "${newValue}("
-                            newValue.endsWith("floor") && !value.endsWith("floor") -> "${newValue}("
-                            newValue.endsWith("ceil") && !value.endsWith("ceil") -> "${newValue}("
-                            newValue.endsWith("round") && !value.endsWith("round") -> "${newValue}("
-                            newValue.endsWith("rads") && !value.endsWith("rads") -> "${newValue}("
-                            newValue.endsWith("degs") && !value.endsWith("degs") -> "${newValue}("
-                            // Auto-complete parentheses pairs
-                            newValue.endsWith("(") && !value.endsWith("(") -> {
-                                val openCount = newValue.count { it == '(' }
-                                val closeCount = newValue.count { it == ')' }
-                                if (openCount > closeCount) newValue else newValue
+                            // Function auto-completion with parentheses
+                            newValue.text.endsWith("sin") && !value.text.endsWith("sin") -> {
+                                val newText = "${newValue.text}()"
+                                TextFieldValue(
+                                        text = newText,
+                                        selection = TextRange(newText.length - 1)
+                                )
+                            }
+                            newValue.text.endsWith("cos") && !value.text.endsWith("cos") -> {
+                                val newText = "${newValue.text}()"
+                                TextFieldValue(
+                                        text = newText,
+                                        selection = TextRange(newText.length - 1)
+                                )
+                            }
+                            newValue.text.endsWith("tan") && !value.text.endsWith("tan") -> {
+                                val newText = "${newValue.text}()"
+                                TextFieldValue(
+                                        text = newText,
+                                        selection = TextRange(newText.length - 1)
+                                )
+                            }
+                            newValue.text.endsWith("sqrt") && !value.text.endsWith("sqrt") -> {
+                                val newText = "${newValue.text}()"
+                                TextFieldValue(
+                                        text = newText,
+                                        selection = TextRange(newText.length - 1)
+                                )
+                            }
+                            newValue.text.endsWith("ln") && !value.text.endsWith("ln") -> {
+                                val newText = "${newValue.text}()"
+                                TextFieldValue(
+                                        text = newText,
+                                        selection = TextRange(newText.length - 1)
+                                )
+                            }
+                            newValue.text.endsWith("log10") && !value.text.endsWith("log10") -> {
+                                val newText = "${newValue.text}()"
+                                TextFieldValue(
+                                        text = newText,
+                                        selection = TextRange(newText.length - 1)
+                                )
+                            }
+                            newValue.text.endsWith("exp") && !value.text.endsWith("exp") -> {
+                                val newText = "${newValue.text}()"
+                                TextFieldValue(
+                                        text = newText,
+                                        selection = TextRange(newText.length - 1)
+                                )
+                            }
+                            newValue.text.endsWith("fact") && !value.text.endsWith("fact") -> {
+                                val newText = "${newValue.text}()"
+                                TextFieldValue(
+                                        text = newText,
+                                        selection = TextRange(newText.length - 1)
+                                )
+                            }
+                            newValue.text.endsWith("abs") && !value.text.endsWith("abs") -> {
+                                val newText = "${newValue.text}()"
+                                TextFieldValue(
+                                        text = newText,
+                                        selection = TextRange(newText.length - 1)
+                                )
+                            }
+                            newValue.text.endsWith("floor") && !value.text.endsWith("floor") -> {
+                                val newText = "${newValue.text}()"
+                                TextFieldValue(
+                                        text = newText,
+                                        selection = TextRange(newText.length - 1)
+                                )
+                            }
+                            newValue.text.endsWith("ceil") && !value.text.endsWith("ceil") -> {
+                                val newText = "${newValue.text}()"
+                                TextFieldValue(
+                                        text = newText,
+                                        selection = TextRange(newText.length - 1)
+                                )
+                            }
+                            newValue.text.endsWith("round") && !value.text.endsWith("round") -> {
+                                val newText = "${newValue.text}()"
+                                TextFieldValue(
+                                        text = newText,
+                                        selection = TextRange(newText.length - 1)
+                                )
+                            }
+                            newValue.text.endsWith("rads") && !value.text.endsWith("rads") -> {
+                                val newText = "${newValue.text}()"
+                                TextFieldValue(
+                                        text = newText,
+                                        selection = TextRange(newText.length - 1)
+                                )
+                            }
+                            newValue.text.endsWith("degs") && !value.text.endsWith("degs") -> {
+                                val newText = "${newValue.text}()"
+                                TextFieldValue(
+                                        text = newText,
+                                        selection = TextRange(newText.length - 1)
+                                )
+                            }
+                            // Manual parenthesis completion
+                            newValue.text.endsWith("(") &&
+                                    !value.text.endsWith("(") &&
+                                    newValue.text.length > value.text.length -> {
+                                val openCount = newValue.text.count { it == '(' }
+                                val closeCount = newValue.text.count { it == ')' }
+                                if (openCount > closeCount) {
+                                    val newText = "${newValue.text})"
+                                    TextFieldValue(
+                                            text = newText,
+                                            selection = TextRange(newValue.selection.start)
+                                    )
+                                } else {
+                                    newValue
+                                }
                             }
                             else -> newValue
                         }
