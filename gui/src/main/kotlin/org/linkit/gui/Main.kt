@@ -55,25 +55,13 @@ private val CalculatorLightColorScheme =
 fun main() = application {
     var isOpen by remember { mutableStateOf(true) }
     var isDarkMode by remember { mutableStateOf(true) }
-
-    // Apply macOS dark mode styling
-    LaunchedEffect(isDarkMode) {
-        try {
-            System.setProperty(
-                    "apple.awt.application.appearance",
-                    if (isDarkMode) "NSAppearanceNameDarkAqua" else "NSAppearanceNameAqua"
-            )
-            System.setProperty("apple.laf.useScreenMenuBar", "true")
-        } catch (e: Exception) {
-            // Ignore if not on macOS
-        }
-    }
+    val windowState = remember { WindowState(width = 400.dp, height = 600.dp) }
 
     if (isOpen) {
         Window(
                 onCloseRequest = { isOpen = false },
                 title = "🧮 LinkIt Calculator",
-                state = WindowState(width = 400.dp, height = 600.dp),
+                state = windowState,
                 resizable = true
         ) { CalculatorApp(isDarkModeExternal = isDarkMode, onDarkModeChange = { isDarkMode = it }) }
     }
@@ -88,8 +76,12 @@ fun CalculatorApp(isDarkModeExternal: Boolean = true, onDarkModeChange: (Boolean
     var angleMode by remember { mutableStateOf(AngleMode.RADIANS) }
     var isDarkMode by remember { mutableStateOf(isDarkModeExternal) }
 
-    // Sync with external state
-    LaunchedEffect(isDarkModeExternal) { isDarkMode = isDarkModeExternal }
+    // Sync with external state - only update if different to avoid unnecessary recomposition
+    LaunchedEffect(isDarkModeExternal) {
+        if (isDarkMode != isDarkModeExternal) {
+            isDarkMode = isDarkModeExternal
+        }
+    }
 
     // Update calculator angle mode when state changes
     LaunchedEffect(angleMode) { calc.setAngleMode(angleMode) }
@@ -120,8 +112,9 @@ fun CalculatorApp(isDarkModeExternal: Boolean = true, onDarkModeChange: (Boolean
                         // Dark mode toggle
                         IconButton(
                                 onClick = {
-                                    isDarkMode = !isDarkMode
-                                    onDarkModeChange(isDarkMode)
+                                    val newMode = !isDarkMode
+                                    isDarkMode = newMode
+                                    onDarkModeChange(newMode)
                                 }
                         ) {
                             Text(
