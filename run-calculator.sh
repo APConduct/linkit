@@ -9,7 +9,7 @@ echo "🔨 Building calculator..."
 kotlinc -cp "$(./gradlew -q printClasspath 2>/dev/null || echo '')" \
     app/src/main/kotlin/org/linkit/*.kt \
     -include-runtime \
-    -d calculator.jar
+    -d linkit.jar
 
 if [ $? -eq 0 ]; then
     echo "✅ Build successful!"
@@ -17,7 +17,7 @@ if [ $? -eq 0 ]; then
     echo ""
 
     # Run the calculator with proper input handling
-    java -jar calculator.jar
+    java -jar linkit.jar
 
     # Clean up
     rm -f calculator.jar
@@ -26,6 +26,6 @@ else
     echo "Trying alternative approach..."
 
     # Fallback: use gradle but with better input handling
-    echo "Starting calculator via Gradle..."
+    echo "Starting linkit via Gradle..."
     ./gradlew run --console=plain --quiet
 fi

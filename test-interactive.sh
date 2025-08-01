@@ -8,8 +8,8 @@ echo "============================================="
 echo ""
 
 # Compile the calculator
-echo "🔨 Building calculator..."
-kotlinc app/src/main/kotlin/org/linkit/*.kt -include-runtime -d calculator.jar 2>/dev/null
+echo "🔨 Building linkit..."
+kotlinc app/src/main/kotlin/org/linkit/*.kt -include-runtime -d linkit.jar 2>/dev/null
 
 if [ $? -ne 0 ]; then
     echo "❌ Build failed!"
@@ -42,7 +42,7 @@ test_expressions=(
     "quit"
 )
 
-echo "🚀 Running calculator with test expressions:"
+echo "🚀 Running linkit with test expressions:"
 echo "============================================"
 
 # Create input file with test expressions
@@ -64,7 +64,7 @@ echo "📤 Calculator output:"
 echo "===================="
 
 # Run the calculator
-java -jar calculator.jar < "$input_file"
+java -jar linkit.jar < "$input_file"
 
 # Cleanup
 rm -f "$input_file" calculator.jar
@@ -72,6 +72,6 @@ rm -f "$input_file" calculator.jar
 echo ""
 echo "✨ To run the calculator interactively yourself:"
 echo "   1. Compile: kotlinc app/src/main/kotlin/org/linkit/*.kt -include-runtime -d calculator.jar"
-echo "   2. Run: java -jar calculator.jar"
+echo "   2. Run: java -jar linkit.jar"
 echo "   3. Enter expressions like: sqrt(16) + sin(PI/2)"
 echo "   4. Type 'quit' to exit"
