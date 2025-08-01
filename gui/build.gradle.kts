@@ -52,16 +52,10 @@ compose.desktop {
                 upgradeUuid = "b2c8b6e4-8c4e-4b5a-9c1d-3f2e1a0b9c8d"
             }
 
-            linux {
-                iconFile.set(project.file("src/main/resources/icon.png"))
-            }
+            linux { iconFile.set(project.file("src/main/resources/icon.png")) }
         }
     }
 }
 
 // Apply a specific Java toolchain to match the app module
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
-}
+java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }

@@ -54,24 +54,42 @@ private val CalculatorLightColorScheme =
 
 fun main() = application {
     var isOpen by remember { mutableStateOf(true) }
+    var isDarkMode by remember { mutableStateOf(true) }
+
+    // Apply macOS dark mode styling
+    LaunchedEffect(isDarkMode) {
+        try {
+            System.setProperty(
+                    "apple.awt.application.appearance",
+                    if (isDarkMode) "NSAppearanceNameDarkAqua" else "NSAppearanceNameAqua"
+            )
+            System.setProperty("apple.laf.useScreenMenuBar", "true")
+        } catch (e: Exception) {
+            // Ignore if not on macOS
+        }
+    }
 
     if (isOpen) {
         Window(
                 onCloseRequest = { isOpen = false },
-                title = "LinkIt Calculator",
-                state = WindowState(width = 400.dp, height = 600.dp)
-        ) { CalculatorApp() }
+                title = "🧮 LinkIt Calculator",
+                state = WindowState(width = 400.dp, height = 600.dp),
+                resizable = true
+        ) { CalculatorApp(isDarkModeExternal = isDarkMode, onDarkModeChange = { isDarkMode = it }) }
     }
 }
 
 @Composable
-fun CalculatorApp() {
+fun CalculatorApp(isDarkModeExternal: Boolean = true, onDarkModeChange: (Boolean) -> Unit = {}) {
     val calc = remember { Calc() }
     val parser = remember { Parser() }
     var displayText by remember { mutableStateOf("0") }
     var currentInput by remember { mutableStateOf("") }
     var angleMode by remember { mutableStateOf(AngleMode.RADIANS) }
-    var isDarkMode by remember { mutableStateOf(true) }
+    var isDarkMode by remember { mutableStateOf(isDarkModeExternal) }
+
+    // Sync with external state
+    LaunchedEffect(isDarkModeExternal) { isDarkMode = isDarkModeExternal }
 
     // Update calculator angle mode when state changes
     LaunchedEffect(angleMode) { calc.setAngleMode(angleMode) }
@@ -100,7 +118,12 @@ fun CalculatorApp() {
                             verticalAlignment = Alignment.CenterVertically
                     ) {
                         // Dark mode toggle
-                        IconButton(onClick = { isDarkMode = !isDarkMode }) {
+                        IconButton(
+                                onClick = {
+                                    isDarkMode = !isDarkMode
+                                    onDarkModeChange(isDarkMode)
+                                }
+                        ) {
                             Text(
                                     text = if (isDarkMode) "🌙" else "☀️",
                                     style = MaterialTheme.typography.titleLarge,
