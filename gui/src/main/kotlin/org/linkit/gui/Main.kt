@@ -6,7 +6,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
 import org.linkit.AngleMode
@@ -149,12 +152,29 @@ fun CalculatorApp(isDarkModeExternal: Boolean = true, onDarkModeChange: (Boolean
 
                 HorizontalDivider()
 
-                // Display
-                CalculatorDisplay(
-                        displayText = displayText,
+                // Input area
+                CalculatorInput(
                         currentInput = currentInput,
-                        modifier = Modifier.height(120.dp)
+                        modifier = Modifier.height(100.dp),
+                        onInputChange = { currentInput = it },
+                        onCalculate = {
+                            try {
+                                if (currentInput.isNotEmpty()) {
+                                    val expr = parser.parse(currentInput)
+                                    val result = calc.eval(expr)
+                                    displayText =
+                                            PreciseDisplay.formatValue(result, calc.getAngleMode())
+                                    currentInput = ""
+                                }
+                            } catch (e: Exception) {
+                                displayText = "Error: ${e.message}"
+                                currentInput = ""
+                            }
+                        }
                 )
+
+                // Result display
+                ResultDisplay(displayText = displayText, modifier = Modifier.height(80.dp))
 
                 HorizontalDivider()
 
@@ -183,7 +203,7 @@ fun CalculatorApp(isDarkModeExternal: Boolean = true, onDarkModeChange: (Boolean
                                 currentInput = currentInput.dropLast(1)
                             }
                         },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(0.8f)
                 )
             }
         }
@@ -191,36 +211,70 @@ fun CalculatorApp(isDarkModeExternal: Boolean = true, onDarkModeChange: (Boolean
 }
 
 @Composable
-fun CalculatorDisplay(displayText: String, currentInput: String, modifier: Modifier = Modifier) {
+fun CalculatorInput(
+        currentInput: String,
+        modifier: Modifier = Modifier,
+        onInputChange: (String) -> Unit = {},
+        onCalculate: () -> Unit = {}
+) {
+    Card(
+            modifier = modifier.fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                verticalArrangement = Arrangement.Center
+        ) {
+            SmartInputField(
+                    value = currentInput,
+                    onValueChange = { newValue ->
+                        // Smart parentheses completion
+                        val smartValue =
+                                when {
+                                    newValue.endsWith("sin(") ||
+                                            newValue.endsWith("cos(") ||
+                                            newValue.endsWith("tan(") ||
+                                            newValue.endsWith("sqrt(") ||
+                                            newValue.endsWith("ln(") ||
+                                            newValue.endsWith("log10(") ||
+                                            newValue.endsWith("exp(") ||
+                                            newValue.endsWith("fact(") ||
+                                            newValue.endsWith("abs(") ||
+                                            newValue.endsWith("floor(") ||
+                                            newValue.endsWith("ceil(") ||
+                                            newValue.endsWith("round(") -> {
+                                        if (!newValue.endsWith("()")) newValue else newValue
+                                    }
+                                    else -> newValue
+                                }
+                        onInputChange(smartValue)
+                    },
+                    onEnterPressed = onCalculate,
+                    modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
+@Composable
+fun ResultDisplay(displayText: String, modifier: Modifier = Modifier) {
     Card(
             modifier = modifier.fillMaxWidth(),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
             colors =
                     CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
                     )
     ) {
-        Column(
-                modifier = Modifier.fillMaxSize().padding(16.dp),
-                verticalArrangement = Arrangement.SpaceBetween
+        Box(
+                modifier = Modifier.fillMaxSize().padding(20.dp),
+                contentAlignment = Alignment.CenterEnd
         ) {
-            // Current input
-            Text(
-                    text = if (currentInput.isEmpty()) "Enter expression..." else currentInput,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color =
-                            if (currentInput.isEmpty()) {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            } else {
-                                MaterialTheme.colorScheme.onSurface
-                            }
-            )
-
-            // Result display
             Text(
                     text = displayText,
-                    style = MaterialTheme.typography.headlineLarge,
-                    color = MaterialTheme.colorScheme.primary
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
     }
@@ -234,11 +288,11 @@ fun CalculatorButtonGrid(
         onBackspace: () -> Unit,
         modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
         // Row 1: Functions
         Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             CalculatorButton("sin", onInput, modifier = Modifier.weight(1f))
             CalculatorButton("cos", onInput, modifier = Modifier.weight(1f))
@@ -249,7 +303,7 @@ fun CalculatorButtonGrid(
         // Row 2: More functions
         Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             CalculatorButton("ln", onInput, modifier = Modifier.weight(1f))
             CalculatorButton("log10", onInput, modifier = Modifier.weight(1f))
@@ -260,7 +314,7 @@ fun CalculatorButtonGrid(
         // Row 3: Numbers and operators
         Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             CalculatorButton("7", onInput, modifier = Modifier.weight(1f))
             CalculatorButton("8", onInput, modifier = Modifier.weight(1f))
@@ -270,7 +324,7 @@ fun CalculatorButtonGrid(
 
         Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             CalculatorButton("4", onInput, modifier = Modifier.weight(1f))
             CalculatorButton("5", onInput, modifier = Modifier.weight(1f))
@@ -280,7 +334,7 @@ fun CalculatorButtonGrid(
 
         Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             CalculatorButton("1", onInput, modifier = Modifier.weight(1f))
             CalculatorButton("2", onInput, modifier = Modifier.weight(1f))
@@ -290,7 +344,7 @@ fun CalculatorButtonGrid(
 
         Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             CalculatorButton("0", onInput, modifier = Modifier.weight(1f))
             CalculatorButton(".", onInput, modifier = Modifier.weight(1f))
@@ -301,7 +355,7 @@ fun CalculatorButtonGrid(
         // Row 4: Special functions
         Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             CalculatorButton("(", onInput, modifier = Modifier.weight(1f))
             CalculatorButton(")", onInput, modifier = Modifier.weight(1f))
@@ -312,7 +366,7 @@ fun CalculatorButtonGrid(
         // Row 5: Control buttons
         Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Button(
                     onClick = onClear,
@@ -375,8 +429,83 @@ fun CalculatorButton(text: String, onInput: (String) -> Unit, modifier: Modifier
                     ButtonDefaults.outlinedButtonColors(
                             contentColor = MaterialTheme.colorScheme.onSurface,
                             containerColor = MaterialTheme.colorScheme.surface
-                    )
-    ) { Text(text = text, style = MaterialTheme.typography.bodyMedium) }
+                    ),
+            contentPadding = PaddingValues(vertical = 4.dp, horizontal = 8.dp)
+    ) { Text(text = text, style = MaterialTheme.typography.bodySmall) }
+}
+
+@Composable
+fun SmartInputField(
+        value: String,
+        onValueChange: (String) -> Unit,
+        onEnterPressed: () -> Unit,
+        modifier: Modifier = Modifier
+) {
+    val focusRequester = remember { FocusRequester() }
+
+    OutlinedTextField(
+            value = value,
+            onValueChange = { newValue ->
+                // Smart features
+                val processedValue =
+                        when {
+                            // Auto-complete function parentheses
+                            newValue.endsWith("sin") && !value.endsWith("sin") -> "${newValue}("
+                            newValue.endsWith("cos") && !value.endsWith("cos") -> "${newValue}("
+                            newValue.endsWith("tan") && !value.endsWith("tan") -> "${newValue}("
+                            newValue.endsWith("sqrt") && !value.endsWith("sqrt") -> "${newValue}("
+                            newValue.endsWith("ln") && !value.endsWith("ln") -> "${newValue}("
+                            newValue.endsWith("log10") && !value.endsWith("log10") -> "${newValue}("
+                            newValue.endsWith("exp") && !value.endsWith("exp") -> "${newValue}("
+                            newValue.endsWith("fact") && !value.endsWith("fact") -> "${newValue}("
+                            newValue.endsWith("abs") && !value.endsWith("abs") -> "${newValue}("
+                            newValue.endsWith("floor") && !value.endsWith("floor") -> "${newValue}("
+                            newValue.endsWith("ceil") && !value.endsWith("ceil") -> "${newValue}("
+                            newValue.endsWith("round") && !value.endsWith("round") -> "${newValue}("
+                            newValue.endsWith("rads") && !value.endsWith("rads") -> "${newValue}("
+                            newValue.endsWith("degs") && !value.endsWith("degs") -> "${newValue}("
+                            // Auto-complete parentheses pairs
+                            newValue.endsWith("(") && !value.endsWith("(") -> {
+                                val openCount = newValue.count { it == '(' }
+                                val closeCount = newValue.count { it == ')' }
+                                if (openCount > closeCount) newValue else newValue
+                            }
+                            else -> newValue
+                        }
+                onValueChange(processedValue)
+            },
+            modifier =
+                    modifier.focusRequester(focusRequester).onKeyEvent { keyEvent ->
+                        when {
+                            keyEvent.key == Key.Enter && keyEvent.type == KeyEventType.KeyUp -> {
+                                onEnterPressed()
+                                true
+                            }
+                            // Ctrl/Cmd + A to select all
+                            keyEvent.key == Key.A &&
+                                    (keyEvent.isCtrlPressed || keyEvent.isMetaPressed) &&
+                                    keyEvent.type == KeyEventType.KeyUp -> {
+                                // Note: Text selection is handled automatically by TextField
+                                false
+                            }
+                            else -> false
+                        }
+                    },
+            label = { Text("Type expression (Enter to calculate)") },
+            textStyle = MaterialTheme.typography.bodyLarge,
+            colors =
+                    OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
+                            cursorColor = MaterialTheme.colorScheme.primary
+                    ),
+            singleLine = true,
+            placeholder = { Text("Type: sin(30), sqrt(16), fact(5), PI/2... (Enter to calculate)") }
+    )
+
+    // Auto-focus the text field when the composable is first created
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
 }
 
 @Preview
