@@ -1,0 +1,12 @@
+{
+  "kotlin.languageServer.enabled": true,
+  "kotlin.compiler.jvm.target": "21",
+  "kotlin.completion.snippets.enabled": true,
+  "kotlin.linting.enabled": true,
+  "kotlin.indexing.enabled": true,
+  "kotlin.debugAdapter.enabled": true,
+  "kotlin.trace.server": "verbose",
+  "files.associations": {
+    "*.kts": "kotlin"
+  }
+}

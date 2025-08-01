@@ -1,0 +1,22 @@
+{
+  "lsp": {
+    "kotlin-language-server": {
+      "binary": {
+        "path": "/opt/homebrew/bin/kotlin-language-server"
+      },
+      "initialization_options": {
+        "storagePath": ".kotlin-language-server",
+        "compiler": {
+          "jvm": {
+            "target": "21"
+          }
+        }
+      }
+    }
+  },
+  "languages": {
+    "Kotlin": {
+      "language_servers": ["kotlin-language-server"]
+    }
+  }
+}
