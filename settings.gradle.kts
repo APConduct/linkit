@@ -12,4 +12,6 @@ plugins {
 }
 
 rootProject.name = "linkit"
+
 include("app")
+include("gui")
